@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">لود بالانسر</string>
+    <string name="start">شروع</string>
+    <string name="stop">توقف</string>
+    <string name="status_running">فعال: وای‌فای و دیتای سیم‌کارت با هم استفاده می‌شوند</string>
+    <string name="status_stopped">متوقف</string>
+    <string name="wifi">وای‌فای</string>
+    <string name="mobile">دیتای سیم‌کارت</string>
+    <string name="network_line">%1$s: %2$s (دانلود)   %3$s (آپلود)   اتصال‌ها: %4$d</string>
+    <string name="network_missing">در دسترس نیست</string>
+    <string name="total_line">مجموع: %1$s دانلود</string>
+    <string name="hint">وای‌فای و دیتای سیم‌کارت هر دو باید روشن باشند. هر اتصال جدید به شبکه‌ی کم‌کارتر می‌رود.</string>
+    <string name="connections">اتصال‌ها: %1$d</string>
+    <string name="total_title">سرعت کل دانلود</string>
+
+    <string name="usage_title">مصرف داده</string>
+    <string name="today">امروز</string>
+    <string name="week">۷ روز</string>
+    <string name="month">۳۰ روز</string>
+    <string name="sites_title">مصرف به تفکیک سایت</string>
+    <string name="no_usage">هنوز مصرفی ثبت نشده</string>
+    <string name="usage_total">کل: %1$s   وای‌فای: %2$s   سیم‌کارت: %3$s</string>
+    <string name="details">جزئیات</string>
+</resources>

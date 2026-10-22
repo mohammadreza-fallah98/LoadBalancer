@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Load Balancer</string>
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+    <string name="status_running">Running: Wi-Fi and mobile data are used together</string>
+    <string name="status_stopped">Stopped</string>
+    <string name="wifi">Wi-Fi</string>
+    <string name="mobile">Mobile data</string>
+    <string name="network_line">%1$s: %2$s  (down)   %3$s  (up)   connections: %4$d</string>
+    <string name="network_missing">not available</string>
+    <string name="total_line">Total: %1$s down</string>
+    <string name="hint">Both Wi-Fi and mobile data must be on. Each new connection goes to the less busy network.</string>
+    <string name="connections">Connections: %1$d</string>
+    <string name="total_title">Total download speed</string>
+
+    <string name="usage_title">Data usage</string>
+    <string name="today">Today</string>
+    <string name="week">7 days</string>
+    <string name="month">30 days</string>
+    <string name="sites_title">Usage by site</string>
+    <string name="no_usage">No usage recorded yet</string>
+    <string name="usage_total">Total: %1$s   Wi-Fi: %2$s   Mobile: %3$s</string>
+    <string name="details">Details</string>
+</resources>
