@@ -21,4 +21,7 @@
     <string name="no_usage">No usage recorded yet</string>
     <string name="usage_total">Total: %1$s   Wi-Fi: %2$s   Mobile: %3$s</string>
     <string name="details">Details</string>
+    <string name="status_running_short">Load balancer is running</string>
+    <string name="notification_text">Wi-Fi ↓ %1$s/s   Mobile ↓ %2$s/s</string>
+    <string name="collapse">Collapse</string>
 </resources>

@@ -32,7 +32,8 @@ class MainActivity : Activity() {
     private lateinit var sitesBox: LinearLayout
     private val chips = ArrayList<TextView>()
     private var period = 0
-    private var visibleSites = 15
+    private var visibleSites = INITIAL_SITES
+    private var totalSites = 0
     private lateinit var chart: UsageChart
     private lateinit var moreBtn: TextView
     private val periodDays = intArrayOf(1, 7, 30)
@@ -96,7 +97,7 @@ class MainActivity : Activity() {
             val chip = label(getString(res), 14f, Color.WHITE, true).apply {
                 gravity = Gravity.CENTER
                 setPadding(dp(16), dp(8), dp(16), dp(8))
-                setOnClickListener { period = i; visibleSites = 15; renderUsage() }
+                setOnClickListener { period = i; visibleSites = INITIAL_SITES; renderUsage() }
             }
             chips.add(chip)
             chipRow.addView(chip, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f).apply { setMargins(dp(3), 0, dp(3), 0) })
@@ -117,7 +118,10 @@ class MainActivity : Activity() {
             gravity = Gravity.CENTER
             background = round(ACCENT, 18)
             setPadding(dp(16), dp(10), dp(16), dp(10))
-            setOnClickListener { visibleSites += 10; renderUsage() }
+            setOnClickListener {
+                visibleSites = if (visibleSites >= totalSites) INITIAL_SITES else visibleSites + SITES_STEP
+                renderUsage()
+            }
         }
         content.addView(moreBtn, cardParams())
 
@@ -127,6 +131,9 @@ class MainActivity : Activity() {
         })
 
         UsageStore.init(this)
+        if (android.os.Build.VERSION.SDK_INT >= 33) {
+            requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 2)
+        }
         setContentView(ScrollView(this).apply {
             isFillViewport = true
             background = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf(BG_TOP, BG_BOTTOM))
@@ -195,7 +202,7 @@ class MainActivity : Activity() {
     }
 
     private fun startVpn() {
-        startService(Intent(this, BalancerVpnService::class.java))
+        startForegroundService(Intent(this, BalancerVpnService::class.java))
     }
 
     private fun renderUsage() {
@@ -212,7 +219,9 @@ class MainActivity : Activity() {
         val series = UsageStore.series(periodDays[period])
         chart.setData(series.first, series.second, series.third, getString(R.string.wifi), getString(R.string.mobile))
         sitesBox.removeAllViews()
-        moreBtn.visibility = if (sum.sites.size > visibleSites) View.VISIBLE else View.GONE
+        totalSites = sum.sites.size
+        moreBtn.visibility = if (totalSites > INITIAL_SITES) View.VISIBLE else View.GONE
+        moreBtn.setText(if (visibleSites >= totalSites) R.string.collapse else R.string.details)
         if (sum.sites.isEmpty()) {
             sitesBox.addView(label(getString(R.string.no_usage), 13f, TEXT_DIM).apply { setPadding(0, dp(6), 0, dp(6)) })
             return
@@ -273,6 +282,8 @@ class MainActivity : Activity() {
 
     companion object {
         private const val REQUEST_VPN = 1
+        private const val INITIAL_SITES = 10
+        private const val SITES_STEP = 10
         private val BG_TOP = Color.parseColor("#141C4F")
         private val BG_BOTTOM = Color.parseColor("#070B22")
         private val CARD = Color.parseColor("#1A2260")

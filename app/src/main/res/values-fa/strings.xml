@@ -21,4 +21,7 @@
     <string name="no_usage">هنوز مصرفی ثبت نشده</string>
     <string name="usage_total">کل: %1$s   وای‌فای: %2$s   سیم‌کارت: %3$s</string>
     <string name="details">جزئیات</string>
+    <string name="status_running_short">لود بالانسر فعال است</string>
+    <string name="notification_text">وای‌فای ↓ %1$s/s   سیم‌کارت ↓ %2$s/s</string>
+    <string name="collapse">بستن</string>
 </resources>

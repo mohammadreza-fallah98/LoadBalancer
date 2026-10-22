@@ -1,6 +1,15 @@
 package com.loadbalancer.app
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Intent
+import android.content.pm.ServiceInfo
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.text.format.Formatter
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import java.io.FileInputStream
@@ -12,6 +21,54 @@ class BalancerVpnService : VpnService() {
     private var pool: NetPool? = null
     private var forwarder: Forwarder? = null
     private var worker: Thread? = null
+    private val handler = Handler(Looper.getMainLooper())
+    private var lastDown = longArrayOf(0, 0)
+
+    private val notifier = object : Runnable {
+        override fun run() {
+            val now = longArrayOf(Stats.wifiDown.get(), Stats.cellDown.get())
+            val text = getString(
+                R.string.notification_text,
+                Formatter.formatFileSize(this@BalancerVpnService, maxOf(0L, now[0] - lastDown[0])),
+                Formatter.formatFileSize(this@BalancerVpnService, maxOf(0L, now[1] - lastDown[1])),
+            )
+            lastDown = now
+            getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, buildNotification(text))
+            handler.postDelayed(this, 2000)
+        }
+    }
+
+    private fun buildNotification(text: String): Notification {
+        val open = PendingIntent.getActivity(
+            this, 0, Intent(this, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+        val stop = PendingIntent.getService(
+            this, 1, Intent(this, BalancerVpnService::class.java).setAction(ACTION_STOP),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+        return Notification.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_stat)
+            .setContentTitle(getString(R.string.status_running_short))
+            .setContentText(text)
+            .setContentIntent(open)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .addAction(Notification.Action.Builder(null, getString(R.string.stop), stop).build())
+            .build()
+    }
+
+    private fun showForeground() {
+        val nm = getSystemService(NotificationManager::class.java)
+        nm.createNotificationChannel(NotificationChannel(CHANNEL_ID, getString(R.string.app_name), NotificationManager.IMPORTANCE_LOW))
+        val n = buildNotification(getString(R.string.notification_text, "0 B", "0 B"))
+        if (Build.VERSION.SDK_INT >= 29) {
+            startForeground(NOTIFICATION_ID, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+        } else {
+            startForeground(NOTIFICATION_ID, n)
+        }
+        lastDown = longArrayOf(Stats.wifiDown.get(), Stats.cellDown.get())
+        handler.postDelayed(notifier, 2000)
+    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_STOP) {
@@ -19,7 +76,10 @@ class BalancerVpnService : VpnService() {
             stopSelf()
             return START_NOT_STICKY
         }
-        if (tun == null) startBalancer()
+        if (tun == null) {
+            showForeground()
+            startBalancer()
+        }
         return START_STICKY
     }
 
@@ -66,6 +126,8 @@ class BalancerVpnService : VpnService() {
     }
 
     private fun stopBalancer() {
+        handler.removeCallbacks(notifier)
+        stopForeground(STOP_FOREGROUND_REMOVE)
         Stats.running = false
         UsageStore.save()
         worker?.interrupt()
@@ -90,5 +152,7 @@ class BalancerVpnService : VpnService() {
 
     companion object {
         const val ACTION_STOP = "com.loadbalancer.app.STOP"
+        private const val CHANNEL_ID = "balancer"
+        private const val NOTIFICATION_ID = 1
     }
 }
