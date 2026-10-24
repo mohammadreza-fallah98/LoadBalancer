@@ -391,3 +391,8 @@ key.properties
 local.properties
 env/prd.local.json
 _verify/
+
+# Signing keys and build artifacts (never commit)
+*.jks
+keystore.properties
+*.apk
